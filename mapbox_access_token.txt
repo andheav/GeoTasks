@@ -1,6 +1,0 @@
-sk.eyJ1IjoiYW5kaGVhdiIsImEiOiJja2dwdTYzbTIwNm1tMnBwd2NyY2FzcnNhIn0.5AgHYTqd3Rb1R56i14JkWw
-
-Basic Map:
-    Access Token: pk.eyJ1IjoiYW5kaGVhdiIsImEiOiJja2Z4OXZrejExYjNkMnFtdHA2MDhxc2RuIn0.KFVljV08oJ4BWf5jOiOLYA
-    Style URL: mapbox://styles/andheav/ckgpv6ndq4p4f19pmmxbb2var
-    Carto Integration URL: https://api.mapbox.com/styles/v1/andheav/ckgpv6ndq4p4f19pmmxbb2var/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYW5kaGVhdiIsImEiOiJja2Z4OXZrejExYjNkMnFtdHA2MDhxc2RuIn0.KFVljV08oJ4BWf5jOiOLYA
