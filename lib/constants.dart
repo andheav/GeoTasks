@@ -7,6 +7,7 @@ const kBackgroundColor = Colors.white;
 const kTextColor = Color(0xFF303030);
 const kAltTextColor = Colors.white;
 const kShadowColor = Color(0xFFE6E6E6);
+const kMarkerColor = Colors.pink;
 
 const kDefaultPadding = 20.0;
 

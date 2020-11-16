@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geo_tasks/providers/tasks_provider.dart';
 import 'package:latlong/latlong.dart';
+import 'package:provider/provider.dart';
 
-class Map extends StatefulWidget {
+class Map extends StatelessWidget {
   Map({Key key, this.onLongPress, this.taskMarkers});
 
   final void Function(LatLng) onLongPress;
-  final List<Marker> taskMarkers;
+  List<Marker> taskMarkers;
 
-  @override
-  _MapState createState() => new _MapState();
-}
-
-class _MapState extends State<Map> {
   @override
   Widget build(BuildContext context) {
+    final tasksProvider = Provider.of<TasksProvider>(context);
+    final taskMarkers = tasksProvider.tasks.map((e) => e.marker).toList();
+
+    if (this.taskMarkers == null) {
+      this.taskMarkers = taskMarkers;
+    }
+
     return FlutterMap(
       options: MapOptions(
         center: new LatLng(42.493910, -90.679660),
         interactive: true,
-        onLongPress: widget.onLongPress,
+        onLongPress: this.onLongPress,
       ),
       layers: [
         new TileLayerOptions(
@@ -32,13 +36,9 @@ class _MapState extends State<Map> {
           },
         ),
         new MarkerLayerOptions(
-          markers: widget.taskMarkers == [] ? [] : widget.taskMarkers,
+          markers: this.taskMarkers == [] ? [] : this.taskMarkers,
         ),
       ],
     );
   }
-
-  onMapCreated() {}
-
-  onMapClick() {}
 }

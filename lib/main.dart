@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geo_tasks/constants.dart';
-
-import 'body/body.dart';
+import 'package:geo_tasks/screens/home_screen.dart';
 
 void main() {
   runApp(
@@ -23,7 +22,7 @@ class Home extends StatelessWidget {
         centerTitle: true,
         backgroundColor: kPrimaryColor,
       ),
-      body: Body(),
+      body: HomeScreen(),
     );
   }
 }
