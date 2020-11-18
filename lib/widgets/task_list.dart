@@ -12,19 +12,13 @@ class TaskList extends StatelessWidget {
     final tasks = Provider.of<TasksProvider>(context).tasks;
 
     return ListView.builder(
-        padding: EdgeInsets.all(15),
-        itemCount: tasks.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            child: Center(
-              child: TaskItem(
-                id: tasks[index].id,
-                title: tasks[index].title,
-                description: tasks[index].description,
-                marker: tasks[index].marker,
-              ),
-            ),
-          );
-        });
+      padding: EdgeInsets.all(15),
+      itemCount: tasks.length,
+      itemBuilder: (BuildContext context, int index) {
+        return TaskItem(
+          task: tasks[index],
+        );
+      },
+    );
   }
 }

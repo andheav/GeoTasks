@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geo_tasks/models/task.dart';
 import 'package:geo_tasks/providers/tasks_provider.dart';
+import 'package:geo_tasks/utils.dart';
 
 import "package:latlong/latlong.dart";
 import 'package:provider/provider.dart';
@@ -21,7 +24,7 @@ class TaskSettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text('${currentTask.title} Settings'),
+        title: Text('Task Settings'),
         centerTitle: true,
         leading: BackButton(
           onPressed: () => {
@@ -66,77 +69,103 @@ class TaskSettingsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Title
-                          CustomTextInputField(
-                            title: 'Title',
-                            hintText: currentTask.title == null ||
-                                    currentTask.title.length == 0
-                                ? 'Enter a title for the task...'
-                                : currentTask.title,
+                          TextFormField(
+                            initialValue: currentTask.title,
+                            style: TextStyle(fontSize: 18.0),
+                            decoration: InputDecoration(
+                              hintText: "Enter Title...",
+                            ),
                             onChanged: (value) => {
                               tasksProvider.modifyTaskTitle(
-                                  currentTask.id, value),
+                                currentTask.id,
+                                value,
+                              )
                             },
                           ),
 
                           SizedBox(height: 25.0),
 
                           // Description
-                          CustomTextInputField(
-                            title: 'Description',
-                            hintText: currentTask.description == null ||
-                                    currentTask.description.length == 0
-                                ? 'Enter a description for the task...'
-                                : currentTask.description,
+                          TextFormField(
+                            initialValue: currentTask.description,
+                            style: TextStyle(fontSize: 18.0),
+                            decoration: InputDecoration(
+                              hintText: "Enter Description...",
+                            ),
                             onChanged: (value) => {
                               tasksProvider.modifyTaskDescription(
-                                  currentTask.id, value),
+                                currentTask.id,
+                                value,
+                              )
                             },
+                            minLines: 1,
+                            maxLines: 10,
                           ),
 
                           SizedBox(height: 25.0),
 
-                          // // Location
-                          // CustomTextInputField(
-                          //   title: 'Location',
-                          //   hintText: 'Enter the location of the task...',
-                          //   onChanged: (value) => {},
+                          // Location
+                          // Use the MapBox GeoCoding API here!
+                          // TextFormField(
+                          //   initialValue: currentTask.coords,
+                          //   style: TextStyle(fontSize: 18.0),
+                          //   decoration: InputDecoration(
+                          //     hintText: "Enter Location...",
+                          //   ),
+                          //   onChanged: (value) => {
+                          //     tasksProvider.modifyTaskCoords(
+                          //       currentTask.id,
+                          //       value,
+                          //     )
+                          //   },
                           // ),
 
                           // SizedBox(height: 20.0),
 
-                          // Start Time
-                          Text(
-                            'Start Time',
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 5.0),
-                          TextField(
-                            decoration: InputDecoration(
-                              hintText: 'hint text',
-                              border: InputBorder.none,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Remind Me Any Time',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Switch(
+                                value: currentTask.anyTime,
+                                onChanged: (value) => {
+                                  tasksProvider.modifyTaskAnyTime(
+                                      taskId, value),
+                                },
+                              ),
+                            ],
                           ),
 
-                          SizedBox(height: 20.0),
+                          (() {
+                            if (currentTask.anyTime != null && currentTask.anyTime) {
+                              return SizedBox();
+                            } else {
+                              return Column(
+                                children: [
+                                  // Any Time Of Day (boolean)
+                                  AnyTimeOfDaySelector(
+                                    taskId: taskId,
+                                  ),
 
-                          // End Time
-                          Text(
-                            'End Time',
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 5.0),
-                          TextField(
-                            decoration: InputDecoration(
-                              hintText: 'hint text',
-                              border: InputBorder.none,
-                            ),
-                          ),
+                                  // Start Date + Time
+                                  StartDateAndTimeSelector(
+                                    taskId: taskId,
+                                  ),
+
+                                  // End Date + Time
+                                  EndDateAndTimeSelector(
+                                    taskId: taskId,
+                                  ),
+                                ],
+                              );
+                            }
+                          }()),
                         ],
                       ),
                     ),
@@ -147,50 +176,6 @@ class TaskSettingsScreen extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class CustomTextInputField extends StatelessWidget {
-  final String title;
-  final String hintText;
-  final int minLines;
-  final int maxLines;
-  final ValueChanged<String> onChanged;
-
-  const CustomTextInputField(
-      {Key key,
-      this.title,
-      this.hintText,
-      this.minLines,
-      this.maxLines,
-      this.onChanged})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          this.title,
-          style: TextStyle(
-            fontSize: 24.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Container(
-          child: TextField(
-            style: TextStyle(fontSize: 18.0),
-            onChanged: this.onChanged,
-            minLines: this.minLines,
-            maxLines: this.maxLines,
-            decoration: InputDecoration(
-              hintText: this.hintText,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

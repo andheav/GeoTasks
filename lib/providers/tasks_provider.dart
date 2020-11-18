@@ -6,14 +6,14 @@ class TasksProvider with ChangeNotifier {
   List<Task> _tasks = [
     Task(
       id: 1,
-      title: 'Task 1',
-      description: 'This is Task 1',
+      title: 'Drop package off',
+      description: 'Package is 8.2 lbs. Talk to Jess aj aj aj aj aj aj aja aja',
       coords: new LatLng(42.493910, -90.679660),
     ),
     Task(
       id: 2,
-      title: 'Task 2',
-      description: 'This is Task 2 and this is a long description',
+      title: 'Get Eggs',
+      description: '',
       coords: new LatLng(42.497162, -90.667300),
     ),
     Task(
@@ -50,6 +50,13 @@ class TasksProvider with ChangeNotifier {
     return _tasks.firstWhere((task) => task.id == id);
   }
 
+  // TODO: This will eventually need to depend on the task IDs in a database.
+  // Can't always assume that the last task in the list FOR THIS USER
+  // will be the most recent task.
+  int getNewTaskId() {
+    return _tasks.last.id + 1;
+  }
+
   void addTask(Task newTask) {
     _tasks.add(newTask);
     notifyListeners();
@@ -67,6 +74,36 @@ class TasksProvider with ChangeNotifier {
 
   void modifyTaskCoords(int taskId, LatLng newCoords) {
     _tasks.firstWhere((task) => task.id == taskId).coords = newCoords;
+    notifyListeners();
+  }
+
+  void modifyTaskAnyTimeOfDay(int taskId, bool newValue) {
+    _tasks.firstWhere((task) => task.id == taskId).anyTimeOfDay = newValue;
+    notifyListeners();
+  }
+
+  void modifyTaskAnyTime(int taskId, bool newValue) {
+    _tasks.firstWhere((task) => task.id == taskId).anyTime = newValue;
+    notifyListeners();
+  }
+
+  void modifyTaskStartDate(int taskId, DateTime newDate) {
+    _tasks.firstWhere((task) => task.id == taskId).startDate = newDate;
+    notifyListeners();
+  }
+
+  void modifyTaskStartTime(int taskId, TimeOfDay newTime) {
+    _tasks.firstWhere((task) => task.id == taskId).startTime = newTime;
+    notifyListeners();
+  }
+
+  void modifyTaskEndDate(int taskId, DateTime newDate) {
+    _tasks.firstWhere((task) => task.id == taskId).endDate = newDate;
+    notifyListeners();
+  }
+
+  void modifyTaskEndTime(int taskId, TimeOfDay newTime) {
+    _tasks.firstWhere((task) => task.id == taskId).endTime = newTime;
     notifyListeners();
   }
 }

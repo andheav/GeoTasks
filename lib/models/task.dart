@@ -8,10 +8,28 @@ class Task {
   int id;
   String title;
   String description;
-  DateTime startTime;
-  DateTime endTime;
+  DateTime startDate;
+  DateTime endDate;
+  TimeOfDay startTime;
+  TimeOfDay endTime;
+  bool anyTimeOfDay;
+  bool anyTime;
   LatLng coords;
   Marker marker;
+
+  Task.emptyTask() {
+    this.id = -1;
+    this.title = "";
+    this.description = "";
+    this.startDate = DateTime.now();
+    this.endDate = DateTime.now();
+    this.startTime = TimeOfDay.now();
+    this.endTime = TimeOfDay.now();
+    this.anyTimeOfDay = false;
+    this.anyTime = true;
+    this.coords = null;
+    this.marker = null;
+  }
 
   Task({
     @required this.id,
@@ -29,5 +47,7 @@ class Task {
         ),
       ),
     );
+    this.anyTime = false;
+    this.anyTimeOfDay = false;
   }
 }
