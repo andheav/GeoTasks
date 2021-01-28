@@ -1,26 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:geo_tasks/constants.dart';
-import 'package:geo_tasks/providers/tasks_provider.dart';
-import 'package:geo_tasks/screens/create_task_screen.dart';
-import 'package:geo_tasks/screens/home_screen.dart';
-import 'package:geo_tasks/screens/map_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
+
+import 'constants.dart';
+import 'providers/tasks_provider.dart';
+import 'providers/location_provider.dart';
+import 'screens/create_task_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/map_screen.dart';
+import 'utils.dart';
 
 void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => TasksProvider(),
-      child: MaterialApp(
-        title: 'GeoTasks',
-        home: Home(),
-      ),
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => new TasksProvider()),
+      ChangeNotifierProvider(create: (context) => new LocationProvider())
+    ],
+    child: MaterialApp(
+      title: 'GeoTasks',
+      home: Home(),
     ),
-  );
+  ));
 }
 
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Utils.tasksProvider = Provider.of<TasksProvider>(context);
+    Utils.locationProvider = Provider.of<LocationProvider>(context);
+
+    // Listen for user change in location
+    Utils.locationProvider.listenOnLocationChange();
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,

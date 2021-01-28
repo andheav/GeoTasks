@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geo_tasks/constants.dart';
-import 'package:geo_tasks/models/task.dart';
-import 'package:geo_tasks/providers/tasks_provider.dart';
-import 'package:geo_tasks/widgets/map.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:latlong/latlong.dart';
-import 'package:provider/provider.dart';
 
+import '../constants.dart';
+import '../models/task.dart';
+import '../providers/tasks_provider.dart';
+import '../widgets/map.dart';
 import '../utils.dart';
 
 class CreateTaskScreen extends StatefulWidget {
@@ -16,19 +16,36 @@ class CreateTaskScreen extends StatefulWidget {
 
 class _CreateTaskScreenState extends State<CreateTaskScreen> {
   Task newTask = new Task.emptyTask();
+  List<String> possibleAddresses = [];
+
+  String _notificationDistanceValue = "1 mi";
+  List<String> _notificationDistanceItems = [
+    '0.25 mi',
+    '0.5 mi',
+    '1 mi',
+    '2 mi',
+    '3 mi',
+    '4 mi',
+    '5 mi',
+  ];
+
+  ValueNotifier _notificationDistanceChanged = ValueNotifier(1.0);
 
   @override
   Widget build(BuildContext context) {
-    final tasksProvider = Provider.of<TasksProvider>(context);
+    final tasksProvider = Utils.tasksProvider;
 
     setState(() {
-      newTask.id = tasksProvider.getNewTaskId();
+      tasksProvider.getNewTaskId().then((newId) {
+        newTask.id = newId;
+      });
     });
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         elevation: 0,
-        title: Text('Task Settings'),
+        title: Text('Create a Task'),
         centerTitle: true,
         backgroundColor: kPrimaryColor,
         leading: BackButton(
@@ -38,7 +55,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.check),
+            icon: Icon(
+              Icons.check,
+              size: 30.0,
+            ),
             onPressed: () => {
               _saveTask(tasksProvider),
               Navigator.pop(context),
@@ -57,13 +77,25 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     Container(
                       height: constraints.maxHeight * 0.35,
                       child: Map(
-                        onLongPress: (LatLng coords) => {
-                          _setTaskCoords(coords),
-                          _setTaskMarker(new Marker(point: coords)),
+                        notificationDistanceNotifier:
+                            _notificationDistanceChanged,
+                        onLongPress: (LatLng coords) {
+                          if (coords != null) {
+                            _setTaskCoords(coords);
+                            _setTaskMarker(
+                              new Marker(
+                                point: coords,
+                                builder: (context) => new Container(
+                                  child: Icon(
+                                    Icons.place,
+                                    size: kMarkerSize,
+                                    color: kMarkerColor,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
                         },
-                        taskMarkers: newTask.marker == null
-                            ? new List<Marker>()
-                            : new List<Marker>.from([newTask.marker]),
                       ),
                     ),
                     Container(
@@ -80,176 +112,216 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           topRight: Radius.circular(30.0),
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Title
-                          TextFormField(
-                            initialValue: newTask.title,
-                            style: TextStyle(fontSize: 18.0),
-                            decoration: InputDecoration(
-                              hintText: "Enter Title...",
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            TextFormField(
+                              initialValue: newTask.title,
+                              style: TextStyle(fontSize: 18.0),
+                              textInputAction: TextInputAction.done,
+                              decoration: InputDecoration(
+                                hintText: "Enter Title...",
+                              ),
+                              onChanged: (value) => {
+                                _setTaskTitle(value),
+                              },
                             ),
-                            onChanged: (value) => {
-                              _setTaskTitle(value),
-                            },
-                          ),
 
-                          SizedBox(height: 25.0),
+                            SizedBox(height: 25.0),
 
-                          // Description
-                          TextFormField(
-                            initialValue: newTask.description,
-                            style: TextStyle(fontSize: 18.0),
-                            decoration: InputDecoration(
-                              hintText: "Enter Description...",
+                            // Description
+                            TextFormField(
+                              initialValue: newTask.description,
+                              style: TextStyle(fontSize: 18.0),
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.done,
+                              decoration: InputDecoration(
+                                hintText: "Enter Description...",
+                              ),
+                              onChanged: (value) => {
+                                _setTaskDescription(
+                                  value,
+                                )
+                              },
+                              minLines: 1,
+                              maxLines: 10,
                             ),
-                            onChanged: (value) => {
-                              _setTaskDescription(
-                                value,
-                              )
-                            },
-                            minLines: 1,
-                            maxLines: 10,
-                          ),
 
-                          SizedBox(height: 25.0),
+                            SizedBox(height: 25.0),
 
-                          // Location
-                          // Use the MapBox GeoCoding API here!
-                          // TextFormField(
-                          //   initialValue: currentTask.coords,
-                          //   style: TextStyle(fontSize: 18.0),
-                          //   decoration: InputDecoration(
-                          //     hintText: "Enter Location...",
-                          //   ),
-                          //   onChanged: (value) => {
-                          //     tasksProvider.modifyTaskCoords(
-                          //       currentTask.id,
-                          //       value,
-                          //     )
-                          //   },
-                          // ),
+                            DropdownButtonFormField(
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                color: Colors.grey[700],
+                              ),
+                              value: _notificationDistanceValue,
+                              icon: Icon(Icons.arrow_drop_down),
+                              iconSize: 24,
+                              isExpanded: true,
+                              onChanged: (String value) {
+                                if (value != _notificationDistanceValue) {
+                                  _notificationDistanceChanged.value =
+                                      double.parse(value.replaceAll(' mi', ''));
 
-                          // SizedBox(height: 20.0),
+                                  _setTaskNotificationDistance(value);
+                                }
+                              },
+                              items: _notificationDistanceItems
+                                  .map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            ),
 
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Remind Me Any Time',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w500,
+                            // Location
+                            // Use the MapBox GeoCoding API here!
+                            // TextFormField(
+                            //   initialValue: newTask.location != null
+                            //       ? newTask.location
+                            //       : "",
+                            //   style: TextStyle(fontSize: 18.0),
+                            //   decoration: InputDecoration(
+                            //     hintText: "Enter Location...",
+                            //   ),
+                            //   // onChanged: (value) => {
+                            //   //   _findAddressesFromQuery(value),
+                            //   // },
+                            //   onSaved: (value) => {
+                            //     _setTaskCoords(_decodeLocationToCoords(value)),
+                            //     _setTaskLocation(value),
+                            //   },
+                            // ),
+
+                            SizedBox(height: 20.0),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Remind Me Any Time',
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                              Switch(
-                                value: newTask.anyTime,
-                                onChanged: (value) => {
-                                  _setTaskAnyTime(value),
-                                },
-                              ),
-                            ],
-                          ),
+                                Switch(
+                                  value: newTask.anyTime,
+                                  onChanged: (value) => {
+                                    _setTaskAnyTime(value),
+                                  },
+                                ),
+                              ],
+                            ),
 
-                          (() {
-                            if (newTask.anyTime) {
-                              return SizedBox();
-                            } else {
-                              return Column(
-                                children: [
-                                  // Any Time Of Day (boolean)
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Any Time of Day",
-                                        style: TextStyle(
-                                            fontSize: 18.0,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                      Switch(
-                                        value: newTask.anyTimeOfDay == null
-                                            ? false
-                                            : newTask.anyTimeOfDay,
-                                        onChanged: (value) => {
-                                          _setTaskAnyTimeOfDay(value),
-                                        },
-                                      )
-                                    ],
-                                  ),
-
-                                  // Start Date + Time
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      FlatButton(
-                                        padding: EdgeInsets.all(0),
-                                        onPressed: () => _selectStartDate(
-                                            context,
-                                            newTask,
-                                            tasksProvider), // Refer step 3
-                                        child: Text(
-                                          Utils.formatDate(newTask.startDate),
-                                          style: TextStyle(fontSize: 18.0),
+                            (() {
+                              if (newTask.anyTime) {
+                                return SizedBox();
+                              } else {
+                                return Column(
+                                  children: [
+                                    // Any Time Of Day (boolean)
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Any Time of Day",
+                                          style: TextStyle(
+                                              fontSize: 18.0,
+                                              fontWeight: FontWeight.w500),
                                         ),
-                                      ),
-                                      Visibility(
-                                        visible: newTask.anyTimeOfDay == null
-                                            ? true
-                                            : !newTask.anyTimeOfDay,
-                                        child: FlatButton(
+                                        Switch(
+                                          value: newTask.anyTimeOfDay == null
+                                              ? false
+                                              : newTask.anyTimeOfDay,
+                                          onChanged: (value) => {
+                                            _setTaskAnyTimeOfDay(value),
+                                          },
+                                        )
+                                      ],
+                                    ),
+
+                                    // Start Date + Time
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        FlatButton(
                                           padding: EdgeInsets.all(0),
-                                          onPressed: () => _selectStartTime(
-                                              context, newTask, tasksProvider),
+                                          onPressed: () => _selectStartDate(
+                                              context,
+                                              newTask,
+                                              tasksProvider), // Refer step 3
                                           child: Text(
-                                            Utils.formatTime(newTask.startTime),
+                                            Utils.formatDate(newTask.startDate),
                                             style: TextStyle(fontSize: 18.0),
                                           ),
                                         ),
-                                      )
-                                    ],
-                                  ),
+                                        Visibility(
+                                          visible: newTask.anyTimeOfDay == null
+                                              ? true
+                                              : !newTask.anyTimeOfDay,
+                                          child: FlatButton(
+                                            padding: EdgeInsets.all(0),
+                                            onPressed: () => _selectStartTime(
+                                                context,
+                                                newTask,
+                                                tasksProvider),
+                                            child: Text(
+                                              Utils.formatTime(
+                                                  newTask.startTime),
+                                              style: TextStyle(fontSize: 18.0),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
 
-                                  // End Date + Time
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      FlatButton(
-                                        padding: EdgeInsets.all(0),
-                                        onPressed: () => _selectEndDate(
-                                            context,
-                                            newTask,
-                                            tasksProvider), // Refer step 3
-                                        child: Text(
-                                          Utils.formatDate(newTask.endDate),
-                                          style: TextStyle(fontSize: 18.0),
-                                        ),
-                                      ),
-                                      Visibility(
-                                        visible: newTask.anyTimeOfDay == null
-                                            ? true
-                                            : !newTask.anyTimeOfDay,
-                                        child: FlatButton(
+                                    // End Date + Time
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        FlatButton(
                                           padding: EdgeInsets.all(0),
-                                          onPressed: () => _selectEndTime(
-                                              context, newTask, tasksProvider),
+                                          onPressed: () => _selectEndDate(
+                                              context,
+                                              newTask,
+                                              tasksProvider), // Refer step 3
                                           child: Text(
-                                            Utils.formatTime(newTask.endTime),
+                                            Utils.formatDate(newTask.endDate),
                                             style: TextStyle(fontSize: 18.0),
                                           ),
                                         ),
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              );
-                            }
-                          }()),
-                        ],
+                                        Visibility(
+                                          visible: newTask.anyTimeOfDay == null
+                                              ? true
+                                              : !newTask.anyTimeOfDay,
+                                          child: FlatButton(
+                                            padding: EdgeInsets.all(0),
+                                            onPressed: () => _selectEndTime(
+                                                context,
+                                                newTask,
+                                                tasksProvider),
+                                            child: Text(
+                                              Utils.formatTime(newTask.endTime),
+                                              style: TextStyle(fontSize: 18.0),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              }
+                            }()),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -316,9 +388,22 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     });
   }
 
+  void _setTaskLocation(String newLocation) {
+    setState(() {
+      newTask.location = newLocation;
+    });
+  }
+
   void _setTaskMarker(Marker newMarker) {
     setState(() {
       newTask.marker = newMarker;
+    });
+  }
+
+  void _setTaskNotificationDistance(String value) {
+    setState(() {
+      newTask.notificationDistance = double.parse(value.replaceAll(' mi', ''));
+      _notificationDistanceValue = value;
     });
   }
 
@@ -374,5 +459,18 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     );
     if (picked != null && picked != currentTask.endTime)
       _setTaskEndTime(picked);
+  }
+
+  LatLng _decodeLocationToCoords(String value) {
+    Geocoder.local.findAddressesFromQuery(value).then((value) {
+      return value.first.coordinates;
+    });
+  }
+
+  String _findAddressesFromQuery(String value) {
+    Geocoder.local.findAddressesFromQuery(value).then((value) {
+      possibleAddresses = [value[0].addressLine, value[1].addressLine];
+      print(possibleAddresses);
+    });
   }
 }

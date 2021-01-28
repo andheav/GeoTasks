@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:geo_tasks/models/task.dart';
-import 'package:geo_tasks/screens/task_settings_screen.dart';
-import 'package:geo_tasks/utils.dart';
 
+import '../models/task.dart';
+import '../screens/task_settings_screen.dart';
+import '../utils.dart';
 import '../constants.dart';
 
 // ignore: must_be_immutable
@@ -66,8 +65,7 @@ class TaskItem extends StatelessWidget {
   }
 
   RenderObjectWidget displayDescription() {
-    if (this.task.description != null &&
-        this.task.description != "") {
+    if (this.task.description != null && this.task.description != "") {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -79,9 +77,7 @@ class TaskItem extends StatelessWidget {
         ],
       );
     } else {
-      return SizedBox(
-        height: 5.0,
-      );
+      return SizedBox(height: 30.0);
     }
   }
 
@@ -102,9 +98,16 @@ class TaskItem extends StatelessWidget {
                   Text(
                     '${Utils.formatDate(this.task.startDate, shortened: true)}',
                   ),
-                  Text(
-                    '${Utils.formatTime(this.task.startTime)} — ${Utils.formatTime(this.task.endTime)}',
-                  ),
+                  (() {
+                    if (this.task.startTime == null ||
+                        this.task.endTime == null) {
+                      return SizedBox();
+                    } else {
+                      return Text(
+                        '${Utils.formatTime(this.task.startTime)} — ${Utils.formatTime(this.task.endTime)}',
+                      );
+                    }
+                  }()),
                 ],
               );
             }

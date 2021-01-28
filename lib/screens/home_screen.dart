@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:geo_tasks/providers/tasks_provider.dart';
-import 'package:latlong/latlong.dart';
-import 'package:provider/provider.dart';
 
 import '../constants.dart';
-import '../widgets/map.dart';
 import '../widgets/task_list.dart';
+import '../providers/location_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -20,6 +17,15 @@ class HomeScreen extends StatelessWidget {
                   Container(
                     height: constraints.maxHeight * 0.10,
                     decoration: BoxDecoration(color: kPrimaryColor),
+                    // // TEMPORARY FOR TESTING
+                    // child: Center(
+                    //   child: Text(
+                    //     LocationProvider.userCurrentLocation != null
+                    //         ? "Current Location: ${LocationProvider.userCurrentLocation.latitude.toStringAsFixed(5)}, ${LocationProvider.userCurrentLocation.longitude.toStringAsFixed(5)}"
+                    //         : "",
+                    //     style: TextStyle(color: Colors.white, fontSize: 18),
+                    //   ),
+                    // ),
                   ),
                   Container(
                     margin: EdgeInsets.only(

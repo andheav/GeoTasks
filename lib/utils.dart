@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:geo_tasks/models/task.dart';
-import 'package:geo_tasks/providers/tasks_provider.dart';
 import 'package:provider/provider.dart';
 
+import 'constants.dart';
+import 'models/task.dart';
+import 'providers/location_provider.dart';
+import 'providers/tasks_provider.dart';
+
 class Utils {
+  static TasksProvider tasksProvider;
+  static LocationProvider locationProvider;
+
   static String getWeekday(int weekday, bool shortened) {
     switch (weekday) {
       case 1:
@@ -82,9 +88,13 @@ class Utils {
   }
 
   static String formatTime(TimeOfDay time, {bool shortened = false}) {
-    return '${time == null ? TimeOfDay.now().hour == 0 ? 12 : TimeOfDay.now().hour % 12 : time.hour == 0 ? 12 : time.hour % 12}' +
-        '${time == null ? '' : ':' + time.minute.toString()}' +
-        ' ${time == null ? TimeOfDay.now().hour < 12 ? 'AM' : 'PM' : time.hour < 12 ? 'AM' : 'PM'}';
+    return
+        // Hour
+        '${time == null ? '' : time.hour % 12}' +
+            // Minute
+            '${time == null ? '' : ':' + time.minute.toString()}' +
+            // AM or PM
+            ' ${time == null ? '' : time.hour < 12 ? 'AM' : 'PM'}';
   }
 }
 
@@ -112,6 +122,7 @@ class AnyTimeOfDaySelector extends StatelessWidget {
           value: currentTask.anyTimeOfDay == null
               ? false
               : currentTask.anyTimeOfDay,
+          activeColor: kPrimaryColorLight,
           onChanged: (value) =>
               {tasksProvider.modifyTaskAnyTimeOfDay(taskId, value)},
         )
