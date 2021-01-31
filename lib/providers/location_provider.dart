@@ -50,7 +50,7 @@ class LocationProvider with ChangeNotifier {
         final Map<LatLng, Task> coordsMap = Utils.tasksProvider.coordsMap;
         if (coordsMap != null && coordsMap.length > 0) {
           for (LatLng coords in coordsMap.keys) {
-            if (coordsMap[coords].notificationDistance <=
+            if (coordsMap[coords].notificationRadius <=
                 this.getDistanceBetweenPoints(
                   position.latitude,
                   position.longitude,

@@ -33,12 +33,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tasksProvider = Utils.tasksProvider;
+    final _tasksProvider = Utils.tasksProvider;
 
     setState(() {
-      tasksProvider.getNewTaskId().then((newId) {
-        newTask.id = newId;
-      });
+      newTask.id = _tasksProvider.getNewTaskId();
     });
 
     return Scaffold(
@@ -60,7 +58,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               size: 30.0,
             ),
             onPressed: () => {
-              _saveTask(tasksProvider),
+              _saveTask(_tasksProvider),
               Navigator.pop(context),
             },
           ),
@@ -165,7 +163,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   _notificationDistanceChanged.value =
                                       double.parse(value.replaceAll(' mi', ''));
 
-                                  _setTaskNotificationDistance(value);
+                                  _setTaskNotificationRadius(value);
                                 }
                               },
                               items: _notificationDistanceItems
@@ -178,148 +176,129 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               }).toList(),
                             ),
 
-                            // Location
-                            // Use the MapBox GeoCoding API here!
-                            // TextFormField(
-                            //   initialValue: newTask.location != null
-                            //       ? newTask.location
-                            //       : "",
-                            //   style: TextStyle(fontSize: 18.0),
-                            //   decoration: InputDecoration(
-                            //     hintText: "Enter Location...",
-                            //   ),
-                            //   // onChanged: (value) => {
-                            //   //   _findAddressesFromQuery(value),
-                            //   // },
-                            //   onSaved: (value) => {
-                            //     _setTaskCoords(_decodeLocationToCoords(value)),
-                            //     _setTaskLocation(value),
-                            //   },
-                            // ),
-
                             SizedBox(height: 20.0),
 
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Remind Me Any Time',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Switch(
-                                  value: newTask.anyTime,
-                                  onChanged: (value) => {
-                                    _setTaskAnyTime(value),
-                                  },
-                                ),
-                              ],
-                            ),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            //   children: [
+                            //     Text(
+                            //       'Remind Me Any Time',
+                            //       style: TextStyle(
+                            //         fontSize: 18.0,
+                            //         fontWeight: FontWeight.w500,
+                            //       ),
+                            //     ),
+                            //     Switch(
+                            //       value: newTask.anyTime,
+                            //       onChanged: (value) => {
+                            //         _setTaskAnyTime(value),
+                            //       },
+                            //     ),
+                            //   ],
+                            // ),
 
-                            (() {
-                              if (newTask.anyTime) {
-                                return SizedBox();
-                              } else {
-                                return Column(
-                                  children: [
-                                    // Any Time Of Day (boolean)
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "Any Time of Day",
-                                          style: TextStyle(
-                                              fontSize: 18.0,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        Switch(
-                                          value: newTask.anyTimeOfDay == null
-                                              ? false
-                                              : newTask.anyTimeOfDay,
-                                          onChanged: (value) => {
-                                            _setTaskAnyTimeOfDay(value),
-                                          },
-                                        )
-                                      ],
-                                    ),
+                            // (() {
+                            //   if (newTask.anyTime) {
+                            //     return SizedBox();
+                            //   } else {
+                            //     return Column(
+                            //       children: [
+                            //         // Any Time Of Day (boolean)
+                            //         Row(
+                            //           mainAxisAlignment:
+                            //               MainAxisAlignment.spaceBetween,
+                            //           children: [
+                            //             Text(
+                            //               "Any Time of Day",
+                            //               style: TextStyle(
+                            //                   fontSize: 18.0,
+                            //                   fontWeight: FontWeight.w500),
+                            //             ),
+                            //             Switch(
+                            //               value: newTask.anyTimeOfDay == null
+                            //                   ? false
+                            //                   : newTask.anyTimeOfDay,
+                            //               onChanged: (value) => {
+                            //                 _setTaskAnyTimeOfDay(value),
+                            //               },
+                            //             )
+                            //           ],
+                            //         ),
 
-                                    // Start Date + Time
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        FlatButton(
-                                          padding: EdgeInsets.all(0),
-                                          onPressed: () => _selectStartDate(
-                                              context,
-                                              newTask,
-                                              tasksProvider), // Refer step 3
-                                          child: Text(
-                                            Utils.formatDate(newTask.startDate),
-                                            style: TextStyle(fontSize: 18.0),
-                                          ),
-                                        ),
-                                        Visibility(
-                                          visible: newTask.anyTimeOfDay == null
-                                              ? true
-                                              : !newTask.anyTimeOfDay,
-                                          child: FlatButton(
-                                            padding: EdgeInsets.all(0),
-                                            onPressed: () => _selectStartTime(
-                                                context,
-                                                newTask,
-                                                tasksProvider),
-                                            child: Text(
-                                              Utils.formatTime(
-                                                  newTask.startTime),
-                                              style: TextStyle(fontSize: 18.0),
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
+                            //         // Start Date + Time
+                            //         Row(
+                            //           mainAxisAlignment:
+                            //               MainAxisAlignment.spaceBetween,
+                            //           children: [
+                            //             FlatButton(
+                            //               padding: EdgeInsets.all(0),
+                            //               onPressed: () => _selectStartDate(
+                            //                   context,
+                            //                   newTask,
+                            //                   _tasksProvider), // Refer step 3
+                            //               child: Text(
+                            //                 Utils.formatDate(newTask.startDate),
+                            //                 style: TextStyle(fontSize: 18.0),
+                            //               ),
+                            //             ),
+                            //             Visibility(
+                            //               visible: newTask.anyTimeOfDay == null
+                            //                   ? true
+                            //                   : !newTask.anyTimeOfDay,
+                            //               child: FlatButton(
+                            //                 padding: EdgeInsets.all(0),
+                            //                 onPressed: () => _selectStartTime(
+                            //                     context,
+                            //                     newTask,
+                            //                     _tasksProvider),
+                            //                 child: Text(
+                            //                   Utils.formatTime(
+                            //                       newTask.startTime),
+                            //                   style: TextStyle(fontSize: 18.0),
+                            //                 ),
+                            //               ),
+                            //             )
+                            //           ],
+                            //         ),
 
-                                    // End Date + Time
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        FlatButton(
-                                          padding: EdgeInsets.all(0),
-                                          onPressed: () => _selectEndDate(
-                                              context,
-                                              newTask,
-                                              tasksProvider), // Refer step 3
-                                          child: Text(
-                                            Utils.formatDate(newTask.endDate),
-                                            style: TextStyle(fontSize: 18.0),
-                                          ),
-                                        ),
-                                        Visibility(
-                                          visible: newTask.anyTimeOfDay == null
-                                              ? true
-                                              : !newTask.anyTimeOfDay,
-                                          child: FlatButton(
-                                            padding: EdgeInsets.all(0),
-                                            onPressed: () => _selectEndTime(
-                                                context,
-                                                newTask,
-                                                tasksProvider),
-                                            child: Text(
-                                              Utils.formatTime(newTask.endTime),
-                                              style: TextStyle(fontSize: 18.0),
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              }
-                            }()),
+                            //         // End Date + Time
+                            //         Row(
+                            //           mainAxisAlignment:
+                            //               MainAxisAlignment.spaceBetween,
+                            //           children: [
+                            //             FlatButton(
+                            //               padding: EdgeInsets.all(0),
+                            //               onPressed: () => _selectEndDate(
+                            //                   context,
+                            //                   newTask,
+                            //                   _tasksProvider), // Refer step 3
+                            //               child: Text(
+                            //                 Utils.formatDate(newTask.endDate),
+                            //                 style: TextStyle(fontSize: 18.0),
+                            //               ),
+                            //             ),
+                            //             Visibility(
+                            //               visible: newTask.anyTimeOfDay == null
+                            //                   ? true
+                            //                   : !newTask.anyTimeOfDay,
+                            //               child: FlatButton(
+                            //                 padding: EdgeInsets.all(0),
+                            //                 onPressed: () => _selectEndTime(
+                            //                     context,
+                            //                     newTask,
+                            //                     _tasksProvider),
+                            //                 child: Text(
+                            //                   Utils.formatTime(newTask.endTime),
+                            //                   style: TextStyle(fontSize: 18.0),
+                            //                 ),
+                            //               ),
+                            //             )
+                            //           ],
+                            //         ),
+                            //       ],
+                            //     );
+                            //   }
+                            // }()),
                           ],
                         ),
                       ),
@@ -346,51 +325,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     });
   }
 
-  void _setTaskStartDate(DateTime newStartDate) {
-    setState(() {
-      newTask.startDate = newStartDate;
-    });
-  }
-
-  void _setTaskStartTime(TimeOfDay newStartTime) {
-    setState(() {
-      newTask.startTime = newStartTime;
-    });
-  }
-
-  void _setTaskEndDate(DateTime newEndDate) {
-    setState(() {
-      newTask.endDate = newEndDate;
-    });
-  }
-
-  void _setTaskEndTime(TimeOfDay newEndTime) {
-    setState(() {
-      newTask.endTime = newEndTime;
-    });
-  }
-
-  void _setTaskAnyTimeOfDay(bool newAnyTimeOfDay) {
-    setState(() {
-      newTask.anyTimeOfDay = newAnyTimeOfDay;
-    });
-  }
-
-  void _setTaskAnyTime(bool newAnyTime) {
-    setState(() {
-      newTask.anyTime = newAnyTime;
-    });
-  }
-
   void _setTaskCoords(LatLng newCoords) {
     setState(() {
       newTask.coords = newCoords;
-    });
-  }
-
-  void _setTaskLocation(String newLocation) {
-    setState(() {
-      newTask.location = newLocation;
     });
   }
 
@@ -400,9 +337,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     });
   }
 
-  void _setTaskNotificationDistance(String value) {
+  void _setTaskNotificationRadius(String value) {
     setState(() {
-      newTask.notificationDistance = double.parse(value.replaceAll(' mi', ''));
+      newTask.notificationRadius = double.parse(value.replaceAll(' mi', ''));
       _notificationDistanceValue = value;
     });
   }
@@ -411,66 +348,108 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     tasksProvider.addTask(newTask);
   }
 
-  _selectStartDate(BuildContext context, Task currentTask,
-      TasksProvider tasksProvider) async {
-    final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate: currentTask.startDate == null
-          ? DateTime.now()
-          : currentTask.startDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2999),
-    );
-    if (picked != null && picked != currentTask.startDate)
-      _setTaskStartDate(picked);
-  }
+  // void _setTaskStartDate(DateTime newStartDate) {
+  //   setState(() {
+  //     newTask.startDate = newStartDate;
+  //   });
+  // }
 
-  _selectStartTime(BuildContext context, Task currentTask,
-      TasksProvider tasksProvider) async {
-    final TimeOfDay picked = await showTimePicker(
-      context: context,
-      initialTime: currentTask.startTime == null
-          ? TimeOfDay.now()
-          : currentTask.startTime,
-    );
-    if (picked != null && picked != currentTask.startTime)
-      _setTaskStartTime(picked);
-  }
+  // void _setTaskStartTime(TimeOfDay newStartTime) {
+  //   setState(() {
+  //     newTask.startTime = newStartTime;
+  //   });
+  // }
 
-  _selectEndDate(BuildContext context, Task currentTask,
-      TasksProvider tasksProvider) async {
-    final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate:
-          currentTask.endDate == null ? DateTime.now() : currentTask.endDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2999),
-    );
-    if (picked != null && picked != currentTask.endDate)
-      _setTaskEndDate(picked);
-  }
+  // void _setTaskEndDate(DateTime newEndDate) {
+  //   setState(() {
+  //     newTask.endDate = newEndDate;
+  //   });
+  // }
 
-  _selectEndTime(BuildContext context, Task currentTask,
-      TasksProvider tasksProvider) async {
-    final TimeOfDay picked = await showTimePicker(
-      context: context,
-      initialTime:
-          currentTask.endTime == null ? TimeOfDay.now() : currentTask.endTime,
-    );
-    if (picked != null && picked != currentTask.endTime)
-      _setTaskEndTime(picked);
-  }
+  // void _setTaskEndTime(TimeOfDay newEndTime) {
+  //   setState(() {
+  //     newTask.endTime = newEndTime;
+  //   });
+  // }
 
-  LatLng _decodeLocationToCoords(String value) {
-    Geocoder.local.findAddressesFromQuery(value).then((value) {
-      return value.first.coordinates;
-    });
-  }
+  // void _setTaskAnyTimeOfDay(bool newAnyTimeOfDay) {
+  //   setState(() {
+  //     newTask.anyTimeOfDay = newAnyTimeOfDay;
+  //   });
+  // }
 
-  String _findAddressesFromQuery(String value) {
-    Geocoder.local.findAddressesFromQuery(value).then((value) {
-      possibleAddresses = [value[0].addressLine, value[1].addressLine];
-      print(possibleAddresses);
-    });
-  }
+  // void _setTaskAnyTime(bool newAnyTime) {
+  //   setState(() {
+  //     newTask.anyTime = newAnyTime;
+  //   });
+  // }
+
+  // void _setTaskLocation(String newLocation) {
+  //   setState(() {
+  //     newTask.location = newLocation;
+  //   });
+  // }
+
+  // _selectStartDate(BuildContext context, Task currentTask,
+  //     TasksProvider tasksProvider) async {
+  //   final DateTime picked = await showDatePicker(
+  //     context: context,
+  //     initialDate: currentTask.startDate == null
+  //         ? DateTime.now()
+  //         : currentTask.startDate,
+  //     firstDate: DateTime(2020),
+  //     lastDate: DateTime(2999),
+  //   );
+  //   if (picked != null && picked != currentTask.startDate)
+  //     _setTaskStartDate(picked);
+  // }
+
+  // _selectStartTime(BuildContext context, Task currentTask,
+  //     TasksProvider tasksProvider) async {
+  //   final TimeOfDay picked = await showTimePicker(
+  //     context: context,
+  //     initialTime: currentTask.startTime == null
+  //         ? TimeOfDay.now()
+  //         : currentTask.startTime,
+  //   );
+  //   if (picked != null && picked != currentTask.startTime)
+  //     _setTaskStartTime(picked);
+  // }
+
+  // _selectEndDate(BuildContext context, Task currentTask,
+  //     TasksProvider tasksProvider) async {
+  //   final DateTime picked = await showDatePicker(
+  //     context: context,
+  //     initialDate:
+  //         currentTask.endDate == null ? DateTime.now() : currentTask.endDate,
+  //     firstDate: DateTime(2020),
+  //     lastDate: DateTime(2999),
+  //   );
+  //   if (picked != null && picked != currentTask.endDate)
+  //     _setTaskEndDate(picked);
+  // }
+
+  // _selectEndTime(BuildContext context, Task currentTask,
+  //     TasksProvider tasksProvider) async {
+  //   final TimeOfDay picked = await showTimePicker(
+  //     context: context,
+  //     initialTime:
+  //         currentTask.endTime == null ? TimeOfDay.now() : currentTask.endTime,
+  //   );
+  //   if (picked != null && picked != currentTask.endTime)
+  //     _setTaskEndTime(picked);
+  // }
+
+  // LatLng _decodeLocationToCoords(String value) {
+  //   Geocoder.local.findAddressesFromQuery(value).then((value) {
+  //     return value.first.coordinates;
+  //   });
+  // }
+
+  // String _findAddressesFromQuery(String value) {
+  //   Geocoder.local.findAddressesFromQuery(value).then((value) {
+  //     possibleAddresses = [value[0].addressLine, value[1].addressLine];
+  //     print(possibleAddresses);
+  //   });
+  // }
 }

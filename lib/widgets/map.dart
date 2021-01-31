@@ -43,7 +43,7 @@ class _MapState extends State<Map> {
                 color: kMarkerColor.withOpacity(0.15),
                 borderStrokeWidth: 3.0,
                 borderColor: kMarkerColor,
-                radius: task.notificationDistance * 1609.34,
+                radius: task.notificationRadius * 1609.34,
                 useRadiusInMeter: true),
           );
     }

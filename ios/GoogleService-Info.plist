@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>322872968556-8geldqgk2nbilgqsk5dm219cha90jgvf.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.322872968556-8geldqgk2nbilgqsk5dm219cha90jgvf</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBJdrcdfmH2N8MgcbeE3vJLf1TrKccYK9Q</string>
+	<key>GCM_SENDER_ID</key>
+	<string>322872968556</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>andheav.geoTasks</string>
+	<key>PROJECT_ID</key>
+	<string>geo-tasks-1761b</string>
+	<key>STORAGE_BUCKET</key>
+	<string>geo-tasks-1761b.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:322872968556:ios:5dd660e2c1bce8cea8df49</string>
+</dict>
+</plist>

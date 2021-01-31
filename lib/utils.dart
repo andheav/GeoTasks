@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import 'constants.dart';
-import 'models/task.dart';
 import 'providers/location_provider.dart';
 import 'providers/tasks_provider.dart';
 
@@ -10,7 +7,7 @@ class Utils {
   static TasksProvider tasksProvider;
   static LocationProvider locationProvider;
 
-  static String getWeekday(int weekday, bool shortened) {
+  static String _getWeekday(int weekday, bool shortened) {
     switch (weekday) {
       case 1:
         return shortened ? "Mon" : "Monday";
@@ -39,7 +36,7 @@ class Utils {
     }
   }
 
-  static String getMonth(int month) {
+  static String _getMonth(int month) {
     switch (month) {
       case 1:
         return "Jan";
@@ -84,7 +81,7 @@ class Utils {
   }
 
   static String formatDate(DateTime date, {bool shortened = false}) {
-    return '${Utils.getWeekday(date == null ? DateTime.now().weekday : date.weekday, shortened)}, ${Utils.getMonth(date == null ? DateTime.now().month : date.month)} ${date == null ? DateTime.now().day : date.day}';
+    return '${Utils._getWeekday(date == null ? DateTime.now().weekday : date.weekday, shortened)}, ${Utils._getMonth(date == null ? DateTime.now().month : date.month)} ${date == null ? DateTime.now().day : date.day}';
   }
 
   static String formatTime(TimeOfDay time, {bool shortened = false}) {
@@ -98,171 +95,184 @@ class Utils {
   }
 }
 
-class AnyTimeOfDaySelector extends StatelessWidget {
-  const AnyTimeOfDaySelector({
-    Key key,
-    @required this.taskId,
-  }) : super(key: key);
 
-  final int taskId;
 
-  @override
-  Widget build(BuildContext context) {
-    final tasksProvider = Provider.of<TasksProvider>(context);
-    final currentTask = tasksProvider.findById(taskId);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          "Any Time of Day",
-          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
-        ),
-        Switch(
-          value: currentTask.anyTimeOfDay == null
-              ? false
-              : currentTask.anyTimeOfDay,
-          activeColor: kPrimaryColorLight,
-          onChanged: (value) =>
-              {tasksProvider.modifyTaskAnyTimeOfDay(taskId, value)},
-        )
-      ],
-    );
-  }
-}
 
-class StartDateAndTimeSelector extends StatelessWidget {
-  StartDateAndTimeSelector({
-    Key key,
-    @required this.taskId,
-  }) : super(key: key);
 
-  final int taskId;
 
-  @override
-  Widget build(BuildContext context) {
-    final tasksProvider = Provider.of<TasksProvider>(context);
-    final currentTask = tasksProvider.findById(taskId);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        FlatButton(
-          padding: EdgeInsets.all(0),
-          onPressed: () =>
-              _selectDate(context, currentTask, tasksProvider), // Refer step 3
-          child: Text(
-            Utils.formatDate(currentTask.startDate),
-            style: TextStyle(fontSize: 18.0),
-          ),
-        ),
-        Visibility(
-          visible: currentTask.anyTimeOfDay == null
-              ? true
-              : !currentTask.anyTimeOfDay,
-          child: FlatButton(
-            padding: EdgeInsets.all(0),
-            onPressed: () => _selectTime(context, currentTask, tasksProvider),
-            child: Text(
-              Utils.formatTime(currentTask.startTime),
-              style: TextStyle(fontSize: 18.0),
-            ),
-          ),
-        )
-      ],
-    );
-  }
 
-  _selectDate(BuildContext context, Task currentTask,
-      TasksProvider tasksProvider) async {
-    final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate: currentTask.startDate == null
-          ? DateTime.now()
-          : currentTask.startDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2999),
-    );
-    if (picked != null && picked != currentTask.startDate)
-      tasksProvider.modifyTaskStartDate(this.taskId, picked);
-  }
 
-  _selectTime(BuildContext context, Task currentTask,
-      TasksProvider tasksProvider) async {
-    final TimeOfDay picked = await showTimePicker(
-      context: context,
-      initialTime: currentTask.startTime == null
-          ? TimeOfDay.now()
-          : currentTask.startTime,
-    );
-    if (picked != null && picked != currentTask.startTime)
-      tasksProvider.modifyTaskStartTime(this.taskId, picked);
-  }
-}
 
-class EndDateAndTimeSelector extends StatelessWidget {
-  EndDateAndTimeSelector({
-    Key key,
-    @required this.taskId,
-  }) : super(key: key);
 
-  final int taskId;
 
-  @override
-  Widget build(BuildContext context) {
-    final tasksProvider = Provider.of<TasksProvider>(context);
-    final currentTask = tasksProvider.findById(taskId);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        FlatButton(
-          padding: EdgeInsets.all(0),
-          onPressed: () =>
-              _selectDate(context, currentTask, tasksProvider), // Refer step 3
-          child: Text(
-            Utils.formatDate(currentTask.endDate),
-            style: TextStyle(fontSize: 18.0),
-          ),
-        ),
-        Visibility(
-          visible: currentTask.anyTimeOfDay == null
-              ? true
-              : !currentTask.anyTimeOfDay,
-          child: FlatButton(
-            padding: EdgeInsets.all(0),
-            onPressed: () => _selectTime(context, currentTask, tasksProvider),
-            child: Text(
-              Utils.formatTime(currentTask.endTime),
-              style: TextStyle(fontSize: 18.0),
-            ),
-          ),
-        )
-      ],
-    );
-  }
+// class AnyTimeOfDaySelector extends StatelessWidget {
+//   const AnyTimeOfDaySelector({
+//     Key key,
+//     @required this.taskId,
+//   }) : super(key: key);
 
-  _selectDate(BuildContext context, Task currentTask,
-      TasksProvider tasksProvider) async {
-    final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate:
-          currentTask.endDate == null ? DateTime.now() : currentTask.endDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2999),
-    );
-    if (picked != null && picked != currentTask.endDate)
-      tasksProvider.modifyTaskEndDate(this.taskId, picked);
-  }
+//   final int taskId;
 
-  _selectTime(BuildContext context, Task currentTask,
-      TasksProvider tasksProvider) async {
-    final TimeOfDay picked = await showTimePicker(
-      context: context,
-      initialTime:
-          currentTask.endTime == null ? TimeOfDay.now() : currentTask.endTime,
-    );
-    if (picked != null && picked != currentTask.endTime)
-      tasksProvider.modifyTaskEndTime(this.taskId, picked);
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     final tasksProvider = Provider.of<TasksProvider>(context);
+//     final currentTask = tasksProvider.findById(taskId);
+
+//     return Row(
+//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//       children: [
+//         Text(
+//           "Any Time of Day",
+//           style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+//         ),
+//         Switch(
+//           value: currentTask.anyTimeOfDay == null
+//               ? false
+//               : currentTask.anyTimeOfDay,
+//           activeColor: kPrimaryColorLight,
+//           onChanged: (value) =>
+//               {tasksProvider.modifyTaskAnyTimeOfDay(taskId, value)},
+//         )
+//       ],
+//     );
+//   }
+// }
+
+// class StartDateAndTimeSelector extends StatelessWidget {
+//   StartDateAndTimeSelector({
+//     Key key,
+//     @required this.taskId,
+//   }) : super(key: key);
+
+//   final int taskId;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final tasksProvider = Provider.of<TasksProvider>(context);
+//     final currentTask = tasksProvider.findById(taskId);
+
+//     return Row(
+//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//       children: [
+//         FlatButton(
+//           padding: EdgeInsets.all(0),
+//           onPressed: () =>
+//               _selectDate(context, currentTask, tasksProvider), // Refer step 3
+//           child: Text(
+//             Utils.formatDate(currentTask.startDate),
+//             style: TextStyle(fontSize: 18.0),
+//           ),
+//         ),
+//         Visibility(
+//           visible: currentTask.anyTimeOfDay == null
+//               ? true
+//               : !currentTask.anyTimeOfDay,
+//           child: FlatButton(
+//             padding: EdgeInsets.all(0),
+//             onPressed: () => _selectTime(context, currentTask, tasksProvider),
+//             child: Text(
+//               Utils.formatTime(currentTask.startTime),
+//               style: TextStyle(fontSize: 18.0),
+//             ),
+//           ),
+//         )
+//       ],
+//     );
+//   }
+
+//   _selectDate(BuildContext context, Task currentTask,
+//       TasksProvider tasksProvider) async {
+//     final DateTime picked = await showDatePicker(
+//       context: context,
+//       initialDate: currentTask.startDate == null
+//           ? DateTime.now()
+//           : currentTask.startDate,
+//       firstDate: DateTime(2020),
+//       lastDate: DateTime(2999),
+//     );
+//     if (picked != null && picked != currentTask.startDate)
+//       tasksProvider.modifyTaskStartDate(this.taskId, picked);
+//   }
+
+//   _selectTime(BuildContext context, Task currentTask,
+//       TasksProvider tasksProvider) async {
+//     final TimeOfDay picked = await showTimePicker(
+//       context: context,
+//       initialTime: currentTask.startTime == null
+//           ? TimeOfDay.now()
+//           : currentTask.startTime,
+//     );
+//     if (picked != null && picked != currentTask.startTime)
+//       tasksProvider.modifyTaskStartTime(this.taskId, picked);
+//   }
+// }
+
+// class EndDateAndTimeSelector extends StatelessWidget {
+//   EndDateAndTimeSelector({
+//     Key key,
+//     @required this.taskId,
+//   }) : super(key: key);
+
+//   final int taskId;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final tasksProvider = Provider.of<TasksProvider>(context);
+//     final currentTask = tasksProvider.findById(taskId);
+
+//     return Row(
+//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//       children: [
+//         FlatButton(
+//           padding: EdgeInsets.all(0),
+//           onPressed: () =>
+//               _selectDate(context, currentTask, tasksProvider), // Refer step 3
+//           child: Text(
+//             Utils.formatDate(currentTask.endDate),
+//             style: TextStyle(fontSize: 18.0),
+//           ),
+//         ),
+//         Visibility(
+//           visible: currentTask.anyTimeOfDay == null
+//               ? true
+//               : !currentTask.anyTimeOfDay,
+//           child: FlatButton(
+//             padding: EdgeInsets.all(0),
+//             onPressed: () => _selectTime(context, currentTask, tasksProvider),
+//             child: Text(
+//               Utils.formatTime(currentTask.endTime),
+//               style: TextStyle(fontSize: 18.0),
+//             ),
+//           ),
+//         )
+//       ],
+//     );
+//   }
+
+//   _selectDate(BuildContext context, Task currentTask,
+//       TasksProvider tasksProvider) async {
+//     final DateTime picked = await showDatePicker(
+//       context: context,
+//       initialDate:
+//           currentTask.endDate == null ? DateTime.now() : currentTask.endDate,
+//       firstDate: DateTime(2020),
+//       lastDate: DateTime(2999),
+//     );
+//     if (picked != null && picked != currentTask.endDate)
+//       tasksProvider.modifyTaskEndDate(this.taskId, picked);
+//   }
+
+//   _selectTime(BuildContext context, Task currentTask,
+//       TasksProvider tasksProvider) async {
+//     final TimeOfDay picked = await showTimePicker(
+//       context: context,
+//       initialTime:
+//           currentTask.endTime == null ? TimeOfDay.now() : currentTask.endTime,
+//     );
+//     if (picked != null && picked != currentTask.endTime)
+//       tasksProvider.modifyTaskEndTime(this.taskId, picked);
+//   }
+// }

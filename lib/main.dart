@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,13 +11,16 @@ import 'screens/home_screen.dart';
 import 'screens/map_screen.dart';
 import 'utils.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => new TasksProvider()),
       ChangeNotifierProvider(create: (context) => new LocationProvider())
     ],
     child: MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'GeoTasks',
       home: Home(),
     ),

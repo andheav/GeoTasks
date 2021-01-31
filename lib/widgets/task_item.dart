@@ -41,9 +41,6 @@ class TaskItem extends StatelessWidget {
                       (() {
                         return displayDescription();
                       }()),
-                      (() {
-                        return displayDateAndTime();
-                      }()),
                     ],
                   ),
                 ),

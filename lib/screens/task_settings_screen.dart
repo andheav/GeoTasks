@@ -43,7 +43,7 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
     final tasksProvider = Utils.tasksProvider;
     final currentTask = tasksProvider.findById(widget.taskId);
     _notificationDistanceChanged =
-        ValueNotifier(currentTask.notificationDistance);
+        ValueNotifier(currentTask.notificationRadius);
 
     return Scaffold(
       appBar: AppBar(
@@ -126,7 +126,7 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
                                   color: kPrimaryColorLight,
                                 )),
                             onChanged: (value) => {
-                              tasksProvider.modifyTaskTitle(
+                              tasksProvider.updateTaskTitle(
                                 currentTask.id,
                                 value,
                               )
@@ -148,7 +148,7 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
                               ),
                             ),
                             onChanged: (value) => {
-                              tasksProvider.modifyTaskDescription(
+                              tasksProvider.updateTaskDescription(
                                 currentTask.id,
                                 value,
                               )
@@ -165,7 +165,7 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
                               color: Colors.grey[700],
                             ),
                             value: _convertNotifDistToString(
-                                currentTask.notificationDistance),
+                                currentTask.notificationRadius),
                             icon: Icon(Icons.arrow_drop_down),
                             iconSize: 24,
                             isExpanded: true,
@@ -188,100 +188,56 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
 
                           SizedBox(height: 20.0),
 
-                          // Location
-                          // Use the MapBox GeoCoding API here!
-                          // TextFormField(
-                          //   initialValue: currentTask.location,
-                          //   style: TextStyle(fontSize: 18.0),
-                          //   textInputAction: TextInputAction.search,
-                          //   enableInteractiveSelection: true,
-                          //   decoration: InputDecoration(
-                          //     hintText: "Enter Location...",
-                          //     icon: Icon(
-                          //       Icons.place,
-                          //       color: kPrimaryColorLight,
-                          //     ),
-                          //   ),
-                          //   onEditingComplete: () {
-                          //     // Get the location from currentTask.location
-                          //     String location = currentTask.location;
-
-                          //     // Make the location string URL safe (encoded)
-                          //     String locationReqStr = forwardGeocodingBaseUrl +
-                          //         location +
-                          //         forwardGeocodingParams;
-
-                          //     String encodedReqStr =
-                          //         Uri.encodeFull(locationReqStr);
-
-                          //     print(encodedReqStr);
-
-                          //     // Call the forward geocoding api to search for the new address
-                          //     http.get(encodedReqStr).then(
-                          //       (value) {
-                          //         dynamic body = jsonDecode(value.body);
-                          //         setState(() {});
-                          //       },
-                          //     );
-                          //   },
-                          //   onChanged: (value) {
-                          //     tasksProvider.modifyTaskLocation(
-                          //         currentTask.id, value);
-                          //   },
-                          // ),
-
-                          // SizedBox(height: 25.0),
-
                           // This field should probably eventually just be a dropdown that has two options:
                           // Remind Me... [Any Time, Specific Time]
                           // If Any Time, then hide the lower fields like it currently does,
                           // If Specific Time, then show the lower fields
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Remind Me Any Time',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Switch(
-                                value: currentTask.anyTime,
-                                activeColor: kPrimaryColorLight,
-                                onChanged: (value) => {
-                                  tasksProvider.modifyTaskAnyTime(
-                                      widget.taskId, value),
-                                },
-                              ),
-                            ],
-                          ),
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //   children: [
+                          //     Text(
+                          //       'Remind Me Any Time',
+                          //       style: TextStyle(
+                          //         fontSize: 18.0,
+                          //         fontWeight: FontWeight.w500,
+                          //       ),
+                          //     ),
+                          //     Switch(
+                          //       value: currentTask.anyTime,
+                          //       activeColor: kPrimaryColorLight,
+                          //       onChanged: (value) => {
+                          //         tasksProvider.modifyTaskAnyTime(
+                          //             widget.taskId, value),
+                          //       },
+                          //     ),
+                          //   ],
+                          // ),
 
-                          (() {
-                            if (currentTask.anyTime != null &&
-                                currentTask.anyTime) {
-                              return SizedBox();
-                            } else {
-                              return Column(
-                                children: [
-                                  // Any Time Of Day (boolean)
-                                  AnyTimeOfDaySelector(
-                                    taskId: widget.taskId,
-                                  ),
+                          // (() {
+                          //   if (currentTask.anyTime != null &&
+                          //       currentTask.anyTime) {
+                          //     return SizedBox();
+                          //   } else {
+                          //     return Column(
+                          //       children: [
+                          //         // Any Time Of Day (boolean)
+                          //         AnyTimeOfDaySelector(
+                          //           taskId: widget.taskId,
+                          //         ),
 
-                                  // Start Date + Time
-                                  StartDateAndTimeSelector(
-                                    taskId: widget.taskId,
-                                  ),
+                          //         // Start Date + Time
+                          //         StartDateAndTimeSelector(
+                          //           taskId: widget.taskId,
+                          //         ),
 
-                                  // End Date + Time
-                                  EndDateAndTimeSelector(
-                                    taskId: widget.taskId,
-                                  ),
-                                ],
-                              );
-                            }
-                          }()),
+                          //         // End Date + Time
+                          //         EndDateAndTimeSelector(
+                          //           taskId: widget.taskId,
+                          //         ),
+                          //       ],
+                          //     );
+                          //   }
+                          // }()),
                         ],
                       ),
                     ),
@@ -314,7 +270,7 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
       _notificationDistanceValue = value;
     });
 
-    Utils.tasksProvider.modifyTaskNotificationDistance(
+    Utils.tasksProvider.updateTaskNotificationRadius(
         this.widget.taskId, double.parse(value.replaceAll(' mi', '')));
   }
 
