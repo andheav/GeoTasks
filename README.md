@@ -2,9 +2,10 @@
 
 Location-based reminders app for people on the go.
 
-<img src="readme_images/home.png" alt="Home Screen" width="200"/>
-
-<img src="readme_images/task_settings.png" alt="Task Settings" width="200"/>
+<p float="left">
+  <img src="readme_images/home.png" alt="Home Screen" width="200"/>
+  <img src="readme_images/task_settings.png" alt="Task Settings" width="200"/>
+</p>
 
 ## Background
 
