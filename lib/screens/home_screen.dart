@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../constants.dart';
 import '../widgets/task_list.dart';
-import '../providers/location_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   @override

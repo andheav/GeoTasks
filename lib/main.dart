@@ -33,9 +33,6 @@ class Home extends StatelessWidget {
     Utils.tasksProvider = Provider.of<TasksProvider>(context);
     Utils.locationProvider = Provider.of<LocationProvider>(context);
 
-    // Listen for user change in location
-    Utils.locationProvider.listenOnLocationChange();
-
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,

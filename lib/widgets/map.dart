@@ -5,7 +5,6 @@ import 'package:latlong/latlong.dart';
 import '../providers/location_provider.dart';
 import '../utils.dart';
 import '../constants.dart';
-import '../models/task.dart';
 
 class Map extends StatefulWidget {
   Map({

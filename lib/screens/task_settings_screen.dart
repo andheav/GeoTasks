@@ -1,13 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geocoder/geocoder.dart';
 import "package:latlong/latlong.dart";
-import 'package:http/http.dart' as http;
 
-import '../mapbox_access_token.dart';
 import '../utils.dart';
 import '../constants.dart';
 import '../widgets/map.dart';
@@ -23,7 +18,7 @@ class TaskSettingsScreen extends StatefulWidget {
 }
 
 class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
-  String _notificationDistanceValue = "Enter Notification Distance...";
+  String _notificationRadiusValue = "Enter Notification Distance...";
   List<String> _notificationDistanceItems = [
     'Enter Notification Distance...',
     '0.25 mi',
@@ -35,15 +30,16 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
     '5 mi',
   ];
 
-  ValueNotifier _notificationDistanceChanged = ValueNotifier(1.0);
+  ValueNotifier _notificationRadiusChanged = ValueNotifier(1.0);
+
+  bool _editMode = false;
 
   @override
   Widget build(BuildContext context) {
     // final tasksProvider = Provider.of<TasksProvider>(context);
     final tasksProvider = Utils.tasksProvider;
     final currentTask = tasksProvider.findById(widget.taskId);
-    _notificationDistanceChanged =
-        ValueNotifier(currentTask.notificationRadius);
+    _notificationRadiusChanged = ValueNotifier(currentTask.notificationRadius);
 
     return Scaffold(
       appBar: AppBar(
@@ -51,19 +47,45 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
         title: Text('Task Settings'),
         centerTitle: true,
         leading: BackButton(
-          onPressed: () => {
-            Navigator.pop(context),
+          onPressed: () {
+            Navigator.pop(context);
           },
         ),
         actions: [
+          IconButton(
+            icon: _editMode
+                ? Icon(
+                    Icons.check,
+                    size: 30.0,
+                  )
+                : Icon(
+                    Icons.edit,
+                    size: 30.0,
+                  ),
+            onPressed: () {
+              if (_editMode) {
+                _updateTask(currentTask);
+
+                setState(() {
+                  _editMode = false;
+                });
+
+                Navigator.pop(context);
+              } else {
+                setState(() {
+                  _editMode = true;
+                });
+              }
+            },
+          ),
           IconButton(
             icon: Icon(
               Icons.delete,
               size: 30.0,
             ),
-            onPressed: () => {
-              _deleteTask(currentTask),
-              Navigator.pop(context),
+            onPressed: () {
+              _deleteTask(currentTask);
+              Navigator.pop(context);
             },
           ),
         ],
@@ -79,8 +101,7 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
                     height: constraints.maxHeight * 0.35,
                     child: Map(
                       taskId: currentTask.id,
-                      notificationDistanceNotifier:
-                          _notificationDistanceChanged,
+                      notificationDistanceNotifier: _notificationRadiusChanged,
                       onLongPress: (LatLng coords) => {
                         currentTask.marker = new Marker(
                           point: coords,
@@ -116,6 +137,7 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
                         children: [
                           // Title
                           TextFormField(
+                            enabled: _editMode,
                             initialValue: currentTask.title,
                             style: TextStyle(fontSize: 18.0),
                             enableInteractiveSelection: true,
@@ -126,10 +148,9 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
                                   color: kPrimaryColorLight,
                                 )),
                             onChanged: (value) => {
-                              tasksProvider.updateTaskTitle(
-                                currentTask.id,
-                                value,
-                              )
+                              setState(() {
+                                currentTask.title = value;
+                              })
                             },
                           ),
 
@@ -137,6 +158,7 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
 
                           // Description
                           TextFormField(
+                            enabled: _editMode,
                             initialValue: currentTask.description,
                             style: TextStyle(fontSize: 18.0),
                             enableInteractiveSelection: true,
@@ -148,10 +170,9 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
                               ),
                             ),
                             onChanged: (value) => {
-                              tasksProvider.updateTaskDescription(
-                                currentTask.id,
-                                value,
-                              )
+                              setState(() {
+                                currentTask.description = value;
+                              })
                             },
                             minLines: 1,
                             maxLines: 10,
@@ -166,17 +187,19 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
                             ),
                             value: _convertNotifDistToString(
                                 currentTask.notificationRadius),
+                            disabledHint: Text(
+                              _convertNotifDistToString(
+                                  currentTask.notificationRadius),
+                            ),
                             icon: Icon(Icons.arrow_drop_down),
                             iconSize: 24,
                             isExpanded: true,
-                            onChanged: (String value) {
-                              if (value != "Enter Notification Distance...") {
-                                _notificationDistanceChanged.value =
-                                    double.parse(value.replaceAll(' mi', ''));
-
-                                _setTaskNotificationDistance(value);
-                              }
-                            },
+                            onChanged: !_editMode
+                                ? null
+                                : (String value) {
+                                    _evaluateNotificationRadius(
+                                        value, currentTask);
+                                  },
                             items: _notificationDistanceItems
                                 .map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
@@ -251,27 +274,26 @@ class _TaskSettingsScreenState extends State<TaskSettingsScreen> {
     );
   }
 
+  void _updateTask(Task currentTask) {
+    var tasksProvider = Utils.tasksProvider;
+    tasksProvider.updateTask(currentTask);
+  }
+
   void _deleteTask(Task currentTask) {
     var tasksProvider = Utils.tasksProvider;
     tasksProvider.deleteTask(currentTask);
   }
 
-  String _decodeCoords(LatLng coords) {
-    Coordinates coordinates =
-        new Coordinates(coords.latitude, coords.longitude);
-    final addresses =
-        Geocoder.local.findAddressesFromCoordinates(coordinates).then((value) {
-      return value.first.addressLine;
-    });
-  }
+  void _evaluateNotificationRadius(String value, Task currentTask) {
+    if (value != "Enter Notification Distance...") {
+      final radius = double.parse(value.replaceAll(' mi', ''));
+      _notificationRadiusChanged.value = radius;
 
-  void _setTaskNotificationDistance(String value) {
-    setState(() {
-      _notificationDistanceValue = value;
-    });
-
-    Utils.tasksProvider.updateTaskNotificationRadius(
-        this.widget.taskId, double.parse(value.replaceAll(' mi', '')));
+      setState(() {
+        _notificationRadiusValue = value;
+        currentTask.notificationRadius = radius;
+      });
+    }
   }
 
   String _convertNotifDistToString(double dist) {

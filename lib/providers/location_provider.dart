@@ -10,11 +10,11 @@ import '../models/task.dart';
 
 class LocationProvider with ChangeNotifier {
   static Position userCurrentLocation;
-  StreamSubscription<Position> positionStream;
+  StreamSubscription<Position> _positionStream;
 
   LocationProvider() {
     // Get User Current Location
-    this.getUserLocation().then(
+    this._getUserLocation().then(
       (location) {
         if (location == null) {
           print("location is null");
@@ -38,8 +38,8 @@ class LocationProvider with ChangeNotifier {
   }
 
   void listenOnLocationChange() {
-    if (positionStream == null) {
-      positionStream = Geolocator.getPositionStream(
+    if (_positionStream == null) {
+      _positionStream = Geolocator.getPositionStream(
         intervalDuration: Duration(seconds: 5),
       ).listen((Position position) {
         userCurrentLocation = position;
@@ -50,14 +50,16 @@ class LocationProvider with ChangeNotifier {
         final Map<LatLng, Task> coordsMap = Utils.tasksProvider.coordsMap;
         if (coordsMap != null && coordsMap.length > 0) {
           for (LatLng coords in coordsMap.keys) {
-            if (coordsMap[coords].notificationRadius <=
-                this.getDistanceBetweenPoints(
-                  position.latitude,
-                  position.longitude,
-                  coords.latitude,
-                  coords.longitude,
-                )) {
-              print("Task ${coordsMap[coords].id} triggered!");
+            final distanceToTask = this._getDistanceBetweenPoints(
+              position.latitude,
+              position.longitude,
+              coords.latitude,
+              coords.longitude,
+            );
+
+            if (distanceToTask <= coordsMap[coords].notificationRadius) {
+              final navigatorKey = GlobalKey<NavigatorState>();
+              showAlertDialog(navigatorKey.currentState.overlay.context);
             }
           }
         }
@@ -65,7 +67,32 @@ class LocationProvider with ChangeNotifier {
     }
   }
 
-  Future<Position> getUserLocation() async {
+  showAlertDialog(BuildContext context) {
+    // set up the button
+    Widget okButton = FlatButton(
+      child: Text("OK"),
+      onPressed: () {},
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("My title"),
+      content: Text("This is my message."),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  Future<Position> _getUserLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -92,7 +119,7 @@ class LocationProvider with ChangeNotifier {
     return await Geolocator.getCurrentPosition();
   }
 
-  double getDistanceToTask(Task task) {
+  double _getDistanceToTask(Task task) {
     return Geolocator.distanceBetween(
         LocationProvider.userCurrentLocation.latitude,
         LocationProvider.userCurrentLocation.longitude,
@@ -100,7 +127,7 @@ class LocationProvider with ChangeNotifier {
         task.coords.longitude);
   }
 
-  double getDistanceBetweenPoints(
+  double _getDistanceBetweenPoints(
       double lat1, double long1, double lat2, double long2) {
     return Geolocator.distanceBetween(lat1, long1, lat2, long2);
   }

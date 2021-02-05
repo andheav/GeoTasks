@@ -24,6 +24,9 @@ class _TaskListState extends State<TaskList> {
 
     // Retrieve tasks from database
     tasksInitialized = Utils.tasksProvider.initializeTasks();
+
+    // Listen for user change in location
+    Utils.locationProvider.listenOnLocationChange();
   }
 
   @override
